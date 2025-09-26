@@ -1,9 +1,9 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { Button } from "../components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { Plus, Search } from "lucide-react";
+import Link from "next/link"
+import { Button } from "../components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card"
+import { Plus, Search } from "lucide-react"
 
 export default function Home() {
   return (
@@ -11,11 +11,9 @@ export default function Home() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Welcome to Quantum Apps
-          </h1>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Dog License Application</h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
-            Your gateway to AI-Powered Enterprise Apps
+            Register your dog and apply for a license online
           </p>
         </div>
 
@@ -28,7 +26,7 @@ export default function Home() {
                 New Application
               </CardTitle>
               <CardDescription className="text-gray-600 dark:text-gray-300">
-                Submit a new application for our quantum services
+                Apply for a new dog license
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -48,12 +46,12 @@ export default function Home() {
                 Track Application
               </CardTitle>
               <CardDescription className="text-gray-600 dark:text-gray-300">
-                Check the status of your submitted applications
+                Check the status of your dog license application
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Link href="/track-application">
-                <Button variant="outline" className="w-full" size="lg">
+                <Button variant="outline" className="w-full bg-transparent" size="lg">
                   <Search className="w-4 h-4 mr-2" />
                   Track Application
                 </Button>
@@ -67,12 +65,12 @@ export default function Home() {
           <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg">
             <CardContent className="py-8">
               <p className="text-lg text-gray-600 dark:text-gray-300">
-                Generating your application.... It takes up to 5 minutes. Please refresh the browser if you don't see any updates in a few minutes.
+                Complete your dog license application in just a few minutes
               </p>
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
-  );
+  )
 }
