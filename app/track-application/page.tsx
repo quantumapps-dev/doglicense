@@ -8,24 +8,24 @@ import { Input } from "../../components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
 import { Badge } from "../../components/ui/badge"
 import { Search, Calendar, CheckCircle, Dog, User, MapPin, Phone } from "lucide-react"
+import { toast } from "sonner"
 
 interface DogLicenseApplication {
   trackingNumber: string
   submittedAt: string
-  formData: {
-    ownerFirstName: string
-    ownerLastName: string
-    ownerAddress: string
-    ownerCity: string
-    ownerZipCode: string
-    ownerPhone: string
-    dogName: string
-    dogBreed: string
-    dogAge: number
-    dogColor: string
-    dogGender: string
-    spayedNeutered: string
-  }
+  status: string
+  ownerFirstName: string
+  ownerLastName: string
+  ownerAddress: string
+  ownerCity: string
+  ownerZipCode: string
+  ownerPhone: string
+  dogName: string
+  dogBreed: string
+  dogAge: number
+  dogColor: string
+  dogGender: string
+  spayedNeutered: string
 }
 
 export default function TrackApplication() {
@@ -55,7 +55,10 @@ export default function TrackApplication() {
   }
 
   const searchApplication = () => {
-    if (!applicationId.trim() || !isMounted) return
+    if (!applicationId.trim() || !isMounted) {
+      toast.error("Please enter a tracking number")
+      return
+    }
 
     setIsLoading(true)
     setIsSearched(true)
@@ -63,18 +66,39 @@ export default function TrackApplication() {
     // Simulate API call delay
     setTimeout(() => {
       try {
-        const storageKey = `dogLicense_${applicationId.trim()}`
-        const storedApplication = localStorage.getItem(storageKey)
+        console.log("[v0] Searching for tracking number:", applicationId.trim())
 
-        if (storedApplication) {
-          const parsedApplication: DogLicenseApplication = JSON.parse(storedApplication)
-          setApplication(parsedApplication)
+        // Get all applications from localStorage
+        const storedApplications = localStorage.getItem("dogLicenseApplications")
+        console.log("[v0] Retrieved from localStorage:", storedApplications)
+
+        if (storedApplications) {
+          const applications: DogLicenseApplication[] = JSON.parse(storedApplications)
+          console.log("[v0] Parsed applications:", applications)
+
+          // Find the application with matching tracking number
+          const foundApplication = applications.find(
+            (app) => app.trackingNumber.toUpperCase() === applicationId.trim().toUpperCase(),
+          )
+
+          console.log("[v0] Found application:", foundApplication)
+
+          if (foundApplication) {
+            setApplication(foundApplication)
+            toast.success("Application found!")
+          } else {
+            setApplication(null)
+            toast.error("Application not found")
+          }
         } else {
+          console.log("[v0] No applications found in localStorage")
           setApplication(null)
+          toast.error("No applications found")
         }
       } catch (error) {
-        console.error("Error reading from localStorage:", error)
+        console.error("[v0] Error reading from localStorage:", error)
         setApplication(null)
+        toast.error("Error retrieving application")
       }
       setIsLoading(false)
     }, 500)
@@ -112,7 +136,7 @@ export default function TrackApplication() {
             <div className="space-y-2">
               <Input
                 type="text"
-                placeholder="e.g., DL-20250128-ABC123"
+                placeholder="e.g., DOG-XXXXXXXXX-XXXXX"
                 value={applicationId}
                 onChange={(e) => setApplicationId(e.target.value)}
                 onKeyPress={handleKeyPress}
@@ -168,7 +192,7 @@ export default function TrackApplication() {
                       </div>
                       <Badge className="bg-green-600 text-white border-0 px-4 py-2 text-base">
                         <CheckCircle className="w-5 h-5 mr-2" />
-                        SUBMITTED
+                        {application.status.toUpperCase()}
                       </Badge>
                     </div>
 
@@ -191,14 +215,14 @@ export default function TrackApplication() {
                         <div>
                           <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Full Name</p>
                           <p className="text-base text-gray-900 dark:text-white">
-                            {application.formData.ownerFirstName} {application.formData.ownerLastName}
+                            {application.ownerFirstName} {application.ownerLastName}
                           </p>
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Phone Number</p>
                           <p className="text-base text-gray-900 dark:text-white flex items-center gap-2">
                             <Phone className="w-4 h-4 text-gray-400" />
-                            {application.formData.ownerPhone}
+                            {application.ownerPhone}
                           </p>
                         </div>
                         <div className="md:col-span-2">
@@ -206,9 +230,9 @@ export default function TrackApplication() {
                           <p className="text-base text-gray-900 dark:text-white flex items-start gap-2">
                             <MapPin className="w-4 h-4 text-gray-400 mt-1" />
                             <span>
-                              {application.formData.ownerAddress}
+                              {application.ownerAddress}
                               <br />
-                              {application.formData.ownerCity}, {application.formData.ownerZipCode}
+                              {application.ownerCity}, {application.ownerZipCode}
                             </span>
                           </p>
                         </div>
@@ -228,33 +252,29 @@ export default function TrackApplication() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Dog's Name</p>
-                          <p className="text-base text-gray-900 dark:text-white font-semibold">
-                            {application.formData.dogName}
-                          </p>
+                          <p className="text-base text-gray-900 dark:text-white font-semibold">{application.dogName}</p>
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Breed</p>
-                          <p className="text-base text-gray-900 dark:text-white">{application.formData.dogBreed}</p>
+                          <p className="text-base text-gray-900 dark:text-white">{application.dogBreed}</p>
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Age</p>
                           <p className="text-base text-gray-900 dark:text-white">
-                            {application.formData.dogAge} {application.formData.dogAge === 1 ? "year" : "years"} old
+                            {application.dogAge} {application.dogAge === 1 ? "year" : "years"} old
                           </p>
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Gender</p>
-                          <p className="text-base text-gray-900 dark:text-white">{application.formData.dogGender}</p>
+                          <p className="text-base text-gray-900 dark:text-white">{application.dogGender}</p>
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Color/Markings</p>
-                          <p className="text-base text-gray-900 dark:text-white">{application.formData.dogColor}</p>
+                          <p className="text-base text-gray-900 dark:text-white">{application.dogColor}</p>
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Spayed/Neutered</p>
-                          <p className="text-base text-gray-900 dark:text-white">
-                            {application.formData.spayedNeutered}
-                          </p>
+                          <p className="text-base text-gray-900 dark:text-white">{application.spayedNeutered}</p>
                         </div>
                       </div>
                     </CardContent>
@@ -315,7 +335,7 @@ export default function TrackApplication() {
                       <li>The tracking number is entered correctly</li>
                       <li>The application was submitted on this device and browser</li>
                       <li>Your browser's local storage hasn't been cleared</li>
-                      <li>The tracking number format matches: DL-YYYYMMDD-XXXXXX</li>
+                      <li>The tracking number format matches the one provided after submission</li>
                     </ul>
                   </div>
                 </div>
