@@ -1,144 +1,129 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
-import { Badge } from "../../components/ui/badge";
-import { Search, Calendar, CheckCircle, Clock, XCircle } from "lucide-react";
+import type React from "react"
 
-interface Application {
-  id: string;
-  status: "pending" | "in_progress" | "completed" | "rejected";
-  createdTime: string;
-  title: string;
-  description?: string;
+import { useState, useEffect } from "react"
+import { Button } from "../../components/ui/button"
+import { Input } from "../../components/ui/input"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
+import { Badge } from "../../components/ui/badge"
+import { Search, Calendar, CheckCircle, Dog, User, MapPin, Phone } from "lucide-react"
+
+interface DogLicenseApplication {
+  trackingNumber: string
+  submittedAt: string
+  formData: {
+    ownerFirstName: string
+    ownerLastName: string
+    ownerAddress: string
+    ownerCity: string
+    ownerZipCode: string
+    ownerPhone: string
+    dogName: string
+    dogBreed: string
+    dogAge: number
+    dogColor: string
+    dogGender: string
+    spayedNeutered: string
+  }
 }
 
 export default function TrackApplication() {
-  const [applicationId, setApplicationId] = useState("");
-  const [application, setApplication] = useState<Application | null>(null);
-  const [isSearched, setIsSearched] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [applicationId, setApplicationId] = useState("")
+  const [application, setApplication] = useState<DogLicenseApplication | null>(null)
+  const [isSearched, setIsSearched] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "pending":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "in_progress":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "completed":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "rejected":
-        return "bg-red-100 text-red-800 border-red-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "pending":
-        return <Clock className="w-4 h-4" />;
-      case "in_progress":
-        return <Clock className="w-4 h-4" />;
-      case "completed":
-        return <CheckCircle className="w-4 h-4" />;
-      case "rejected":
-        return <XCircle className="w-4 h-4" />;
-      default:
-        return <Clock className="w-4 h-4" />;
-    }
-  };
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   const formatDate = (dateString: string) => {
     try {
-      const date = new Date(dateString);
+      const date = new Date(dateString)
       return date.toLocaleDateString("en-US", {
         year: "numeric",
         month: "long",
         day: "numeric",
         hour: "2-digit",
         minute: "2-digit",
-      });
+      })
     } catch {
-      return "Invalid date";
+      return "Invalid date"
     }
-  };
+  }
 
   const searchApplication = () => {
-    if (!applicationId.trim()) return;
+    if (!applicationId.trim() || !isMounted) return
 
-    setIsLoading(true);
-    setIsSearched(true);
+    setIsLoading(true)
+    setIsSearched(true)
 
     // Simulate API call delay
     setTimeout(() => {
       try {
-        const storedApplications = localStorage.getItem("quantum_applications");
-        if (storedApplications) {
-          const applications: Application[] = JSON.parse(storedApplications);
-          const foundApplication = applications.find(app => app.id === applicationId.trim());
-          setApplication(foundApplication || null);
+        const storageKey = `dogLicense_${applicationId.trim()}`
+        const storedApplication = localStorage.getItem(storageKey)
+
+        if (storedApplication) {
+          const parsedApplication: DogLicenseApplication = JSON.parse(storedApplication)
+          setApplication(parsedApplication)
         } else {
-          setApplication(null);
+          setApplication(null)
         }
       } catch (error) {
-        console.error("Error reading from localStorage:", error);
-        setApplication(null);
+        console.error("Error reading from localStorage:", error)
+        setApplication(null)
       }
-      setIsLoading(false);
-    }, 500);
-  };
+      setIsLoading(false)
+    }, 500)
+  }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
-      searchApplication();
+      searchApplication()
     }
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Search className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+          <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <Search className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            Track Your Application
-          </h1>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Track Your Dog License Application</h1>
           <p className="text-lg text-gray-600 dark:text-gray-300">
-            Enter your application ID to check the current status and details of your submission.
+            Enter your tracking number to check the status and details of your application.
           </p>
         </div>
 
         {/* Search Section */}
-        <Card className="mb-8 shadow-lg border-0 bg-white dark:bg-gray-800">
+        <Card className="mb-8 shadow-xl border-0 bg-white dark:bg-gray-800">
           <CardHeader className="text-center pb-4">
-            <CardTitle className="text-xl text-gray-900 dark:text-white">
-              Find Your Application
-            </CardTitle>
+            <CardTitle className="text-2xl text-gray-900 dark:text-white">Find Your Application</CardTitle>
             <CardDescription className="text-gray-600 dark:text-gray-300">
-              Enter your unique application ID below
+              Enter your unique tracking number below
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Input
                 type="text"
-                placeholder="e.g., APP-2024-001"
+                placeholder="e.g., DL-20250128-ABC123"
                 value={applicationId}
                 onChange={(e) => setApplicationId(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="text-center text-lg py-3 border-2 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                disabled={isLoading}
+                className="text-center text-lg py-6 border-2 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                disabled={isLoading || !isMounted}
               />
             </div>
-            <Button 
+            <Button
               onClick={searchApplication}
-              disabled={isLoading || !applicationId.trim()}
-              className="w-full py-3 text-lg"
+              disabled={isLoading || !applicationId.trim() || !isMounted}
+              className="w-full py-6 text-lg bg-blue-600 hover:bg-blue-700"
               size="lg"
             >
               {isLoading ? (
@@ -156,100 +141,181 @@ export default function TrackApplication() {
           </CardContent>
         </Card>
 
-        {/* Results Section */}
         {isSearched && (
-          <Card className="shadow-lg border-0 bg-white dark:bg-gray-800">
+          <Card className="shadow-xl border-0 bg-white dark:bg-gray-800">
             <CardHeader>
-              <CardTitle className="text-gray-900 dark:text-white">Search Results</CardTitle>
+              <CardTitle className="text-2xl text-gray-900 dark:text-white">Application Details</CardTitle>
             </CardHeader>
             <CardContent>
               {isLoading ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                  <p className="text-gray-600 dark:text-gray-300">Searching for your application...</p>
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600 dark:text-gray-300 text-lg">Searching for your application...</p>
                 </div>
               ) : application ? (
                 <div className="space-y-6">
-                  {/* Application Found */}
-                  <div className="border border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/20 rounded-lg p-6">
-                    <div className="flex items-start justify-between mb-4">
+                  {/* Application Found - Status Badge */}
+                  <div className="border-2 border-green-200 dark:border-green-700 bg-green-50 dark:bg-green-900/20 rounded-xl p-6">
+                    <div className="flex items-center justify-between mb-4">
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                          {application.title}
-                        </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
-                          Application ID: <span className="font-mono font-medium">{application.id}</span>
+                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Application Found</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                          Tracking Number:{" "}
+                          <span className="font-mono font-bold text-blue-600 dark:text-blue-400">
+                            {application.trackingNumber}
+                          </span>
                         </p>
                       </div>
-                      <Badge className={`${getStatusColor(application.status)} flex items-center gap-1`}>
-                        {getStatusIcon(application.status)}
-                        {application.status.replace("_", " ").toUpperCase()}
+                      <Badge className="bg-green-600 text-white border-0 px-4 py-2 text-base">
+                        <CheckCircle className="w-5 h-5 mr-2" />
+                        SUBMITTED
                       </Badge>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-4">
-                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                        <Calendar className="w-4 h-4" />
-                        <span>Created: {formatDate(application.createdTime)}</span>
-                      </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                      <Calendar className="w-4 h-4" />
+                      <span>Submitted: {formatDate(application.submittedAt)}</span>
                     </div>
+                  </div>
 
-                    {application.description && (
-                      <div className="mt-4 pt-4 border-t border-green-200 dark:border-green-700">
+                  {/* Owner Information */}
+                  <Card className="border-2 border-gray-200 dark:border-gray-700">
+                    <CardHeader className="bg-blue-50 dark:bg-blue-900/20">
+                      <CardTitle className="flex items-center gap-2 text-xl text-gray-900 dark:text-white">
+                        <User className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                        Owner Information
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Full Name</p>
+                          <p className="text-base text-gray-900 dark:text-white">
+                            {application.formData.ownerFirstName} {application.formData.ownerLastName}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Phone Number</p>
+                          <p className="text-base text-gray-900 dark:text-white flex items-center gap-2">
+                            <Phone className="w-4 h-4 text-gray-400" />
+                            {application.formData.ownerPhone}
+                          </p>
+                        </div>
+                        <div className="md:col-span-2">
+                          <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Address</p>
+                          <p className="text-base text-gray-900 dark:text-white flex items-start gap-2">
+                            <MapPin className="w-4 h-4 text-gray-400 mt-1" />
+                            <span>
+                              {application.formData.ownerAddress}
+                              <br />
+                              {application.formData.ownerCity}, {application.formData.ownerZipCode}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Dog Information */}
+                  <Card className="border-2 border-gray-200 dark:border-gray-700">
+                    <CardHeader className="bg-purple-50 dark:bg-purple-900/20">
+                      <CardTitle className="flex items-center gap-2 text-xl text-gray-900 dark:text-white">
+                        <Dog className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                        Dog Information
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Dog's Name</p>
+                          <p className="text-base text-gray-900 dark:text-white font-semibold">
+                            {application.formData.dogName}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Breed</p>
+                          <p className="text-base text-gray-900 dark:text-white">{application.formData.dogBreed}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Age</p>
+                          <p className="text-base text-gray-900 dark:text-white">
+                            {application.formData.dogAge} {application.formData.dogAge === 1 ? "year" : "years"} old
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Gender</p>
+                          <p className="text-base text-gray-900 dark:text-white">{application.formData.dogGender}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Color/Markings</p>
+                          <p className="text-base text-gray-900 dark:text-white">{application.formData.dogColor}</p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Spayed/Neutered</p>
+                          <p className="text-base text-gray-900 dark:text-white">
+                            {application.formData.spayedNeutered}
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Status Information */}
+                  <Card className="border-2 border-blue-200 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20">
+                    <CardHeader>
+                      <CardTitle className="text-lg text-gray-900 dark:text-white">Application Status</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                          <div className="flex-1">
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white">Application Submitted</p>
+                            <p className="text-xs text-gray-600 dark:text-gray-400">
+                              {formatDate(application.submittedAt)}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-3 h-3 bg-blue-300 rounded-full"></div>
+                          <div className="flex-1">
+                            <p className="text-sm text-gray-600 dark:text-gray-400">Under Review</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-500">Pending</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
+                          <div className="flex-1">
+                            <p className="text-sm text-gray-600 dark:text-gray-400">License Issued</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-500">Pending</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-6 p-4 bg-white dark:bg-gray-800 rounded-lg border border-blue-200 dark:border-blue-700">
                         <p className="text-sm text-gray-700 dark:text-gray-300">
-                          <strong>Description:</strong> {application.description}
+                          <strong>Note:</strong> Your application has been successfully submitted and is currently being
+                          processed. You will be notified once your dog license has been approved and issued.
                         </p>
                       </div>
-                    )}
-
-                    {/* Status Timeline */}
-                    <div className="mt-6 pt-6 border-t border-green-200 dark:border-green-700">
-                      <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Application Timeline</h4>
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-3 text-sm">
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                          <span className="text-gray-600 dark:text-gray-300">Application submitted</span>
-                          <span className="text-gray-400 dark:text-gray-500">({formatDate(application.createdTime)})</span>
-                        </div>
-                        {application.status !== "pending" && (
-                          <div className="flex items-center gap-3 text-sm">
-                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                            <span className="text-gray-600 dark:text-gray-300">Application under review</span>
-                          </div>
-                        )}
-                        {application.status === "completed" && (
-                          <div className="flex items-center gap-3 text-sm">
-                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                            <span className="text-gray-600 dark:text-gray-300">Application completed</span>
-                          </div>
-                        )}
-                        {application.status === "rejected" && (
-                          <div className="flex items-center gap-3 text-sm">
-                            <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                            <span className="text-gray-600 dark:text-gray-300">Application rejected</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
                 </div>
               ) : (
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Search className="w-8 h-8 text-gray-400 dark:text-gray-500" />
+                <div className="text-center py-12">
+                  <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Search className="w-10 h-10 text-gray-400 dark:text-gray-500" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                    Application Not Found
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300 mb-4">
-                    We couldn't find an application with the ID "{applicationId}".
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Application Not Found</h3>
+                  <p className="text-gray-600 dark:text-gray-300 mb-6 text-lg">
+                    We couldn't find an application with tracking number "{applicationId}".
                   </p>
-                  <div className="text-sm text-gray-500 dark:text-gray-400 space-y-1">
-                    <p>Please check:</p>
-                    <ul className="list-disc list-inside space-y-1 max-w-md mx-auto">
-                      <li>The application ID is correct</li>
-                      <li>The application was submitted on this device</li>
+                  <div className="text-sm text-gray-500 dark:text-gray-400 space-y-2 max-w-md mx-auto">
+                    <p className="font-semibold">Please check:</p>
+                    <ul className="list-disc list-inside space-y-2 text-left">
+                      <li>The tracking number is entered correctly</li>
+                      <li>The application was submitted on this device and browser</li>
                       <li>Your browser's local storage hasn't been cleared</li>
+                      <li>The tracking number format matches: DL-YYYYMMDD-XXXXXX</li>
                     </ul>
                   </div>
                 </div>
@@ -260,19 +326,31 @@ export default function TrackApplication() {
 
         {/* Help Section */}
         {!isSearched && (
-          <Card className="mt-8 shadow-lg border-0 bg-white dark:bg-gray-800">
+          <Card className="mt-8 shadow-xl border-0 bg-white dark:bg-gray-800">
             <CardHeader>
-              <CardTitle className="text-gray-900 dark:text-white">Need Help?</CardTitle>
+              <CardTitle className="text-xl text-gray-900 dark:text-white">Need Help?</CardTitle>
             </CardHeader>
-            <CardContent className="text-sm text-gray-600 dark:text-gray-300 space-y-2">
-              <p>• Application IDs are generated when you submit a new application</p>
-              <p>• Make sure you're using the same browser and device where you submitted your application</p>
-              <p>• If you can't find your application ID, try creating a new application</p>
-              <p>• Contact support if you continue to experience issues</p>
+            <CardContent className="text-sm text-gray-600 dark:text-gray-300 space-y-3">
+              <p className="flex items-start gap-2">
+                <span className="text-blue-600 dark:text-blue-400 font-bold">•</span>
+                <span>Tracking numbers are generated automatically when you submit a new dog license application</span>
+              </p>
+              <p className="flex items-start gap-2">
+                <span className="text-blue-600 dark:text-blue-400 font-bold">•</span>
+                <span>Make sure you're using the same browser and device where you submitted your application</span>
+              </p>
+              <p className="flex items-start gap-2">
+                <span className="text-blue-600 dark:text-blue-400 font-bold">•</span>
+                <span>Save your tracking number in a safe place for future reference</span>
+              </p>
+              <p className="flex items-start gap-2">
+                <span className="text-blue-600 dark:text-blue-400 font-bold">•</span>
+                <span>If you can't find your tracking number, you may need to submit a new application</span>
+              </p>
             </CardContent>
           </Card>
         )}
       </div>
     </div>
-  );
+  )
 }
